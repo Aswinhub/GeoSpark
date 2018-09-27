@@ -37,7 +37,7 @@ public class LocationTracker extends Service implements GoogleApiClient.Connecti
 
     private static final String TAG = "aswin";
     private LocationManager locationManager = null;
-    private static final int LOCATION_INTERVAL = 3 * 1000;
+    private static final int LOCATION_INTERVAL = 30 * 1000;
     private static final float LOCATION_DISTANCE = 1f;
     public static final String CHANNEL_ID = "mychannel";
 
