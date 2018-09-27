@@ -20,7 +20,7 @@ public class RealmDB {
     private static Context context;
     private static Realm realm;
 
-    public static RealmDB with(Context con){
+    public static RealmDB with(Context con) {
         realmDB = new RealmDB();
         context = con;
         realmDB.configureRealm();
@@ -28,7 +28,7 @@ public class RealmDB {
         return realmDB;
     }
 
-    public void configureRealm(){
+    public void configureRealm() {
         Realm.init(context);
         String path = Environment.getExternalStorageDirectory().getPath();
 
@@ -41,7 +41,7 @@ public class RealmDB {
         Realm.setDefaultConfiguration(realmConfiguration);
     }
 
-    public void setCurrentUser(String name){
+    public void setCurrentUser(String name) {
         final CurrentUser currentUser = new CurrentUser();
         currentUser.setUsername(name);
 
@@ -53,7 +53,7 @@ public class RealmDB {
         });
     }
 
-    public void deleteCurrentUser(){
+    public void deleteCurrentUser() {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -62,7 +62,7 @@ public class RealmDB {
         });
     }
 
-    public boolean updateUser(final UserModel userModel){
+    public boolean updateUser(final UserModel userModel) {
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -91,39 +91,46 @@ public class RealmDB {
         return realm.where(UserModel.class).equalTo("username", username).findFirst();
     }
 
-    public void updateLocation(List<Location> locationList){
-        final RealmList<String > lat = new RealmList<>();
-        final RealmList<String > lon = new RealmList<>();
+    public void updateLocation(List<Location> locationList) {
+        final RealmList<String> lat = new RealmList<>();
+        final RealmList<String> lon = new RealmList<>();
 
-        UserModel userModel = realm.where(UserModel.class).equalTo("username", getCurrentUser()).findFirst();
+        if (getCurrentUser() != null) {
+            UserModel userModel = realm.where(UserModel.class).equalTo("username", getCurrentUser()).findFirst();
 
-        if (userModel != null) {
-            lat.addAll(userModel.getLatitude());
-            lon.addAll(userModel.getLongitude());
-        }else {
-            userModel = new UserModel("aswin", "qwerty", lat, lon);
-        }
-        for (Location l :
-                locationList) {
-            lat.add(String.valueOf(l.getLatitude()));
-            lon.add(String.valueOf(l.getLongitude()));
-        }
-
-        final UserModel finalUserModel = userModel;
-
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                finalUserModel.setLatitude(lat);
-                finalUserModel.setLongitude(lon);
-                Log.e(TAG, "execute: ");
-                realm.insertOrUpdate(finalUserModel);
+            if (userModel != null) {
+                lat.addAll(userModel.getLatitude());
+                lon.addAll(userModel.getLongitude());
+            } else {
+                userModel = new UserModel("aswin", "qwerty", lat, lon);
             }
-        });
+            for (Location l :
+                    locationList) {
+                lat.add(String.valueOf(l.getLatitude()));
+                lon.add(String.valueOf(l.getLongitude()));
+            }
+
+            final UserModel finalUserModel = userModel;
+
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    finalUserModel.setLatitude(lat);
+                    finalUserModel.setLongitude(lon);
+                    Log.e(TAG, "execute: ");
+                    realm.insertOrUpdate(finalUserModel);
+                }
+            });
+
+        }
 
     }
 
     private String getCurrentUser() {
-        return realm.where(CurrentUser.class).findFirst().getUsername();
+        CurrentUser currentUser = realm.where(CurrentUser.class).findFirst();
+        if (currentUser != null && currentUser.getUsername() != null)
+            return realm.where(CurrentUser.class).findFirst().getUsername();
+        else
+            return null;
     }
 }

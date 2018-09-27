@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -103,7 +105,11 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void startService(){
-        startService(new Intent(this, LocationTracker.class));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(this, new Intent(this, LocationTracker.class));
+        }else
+            startService(new Intent(this, LocationTracker.class));
     }
 
     public void stopService(){
